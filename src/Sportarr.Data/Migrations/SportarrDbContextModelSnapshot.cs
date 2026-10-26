@@ -3278,6 +3278,9 @@ namespace Sportarr.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("CondensedOnly")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("CutoffFormatScore")
                         .HasColumnType("INTEGER");
 

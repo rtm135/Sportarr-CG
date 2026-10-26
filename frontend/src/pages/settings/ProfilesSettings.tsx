@@ -13,6 +13,7 @@ interface QualityProfile {
   name: string;
   isDefault: boolean;
   upgradesAllowed: boolean;
+  condensedOnly?: boolean;
   cutoffQuality?: number | null;
   items: QualityItem[];
   formatItems: ProfileFormatItem[];
@@ -1405,6 +1406,18 @@ export default function ProfilesSettings({ showAdvanced = false }: ProfilesSetti
                   placeholder="4K Quality"
                 />
               </div>
+
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input type="checkbox" checked={formData.condensedOnly || false}
+                  onChange={(e) => setFormData(prev => ({ ...prev, condensedOnly: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-red-600 focus:ring-red-600" />
+                <span className="text-sm font-medium text-gray-300">Condensed games only
+                  <span className="block text-xs font-normal text-gray-400">
+                    Require a Condensed, Game in 40, or CG title. Full games are never a fallback.
+                    Condensed games may replace full games at a lower resolution.
+                  </span>
+                </span>
+              </label>
 
               {/* Upgrades Allowed */}
               <label className="flex items-center space-x-3 cursor-pointer">

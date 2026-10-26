@@ -103,7 +103,14 @@ public class ReleaseEvaluator
         string? leagueName = null)
     {
         var evaluation = new ReleaseEvaluation();
-        var configuredSizeRuntimeMinutes = Math.Max(1, runtimeMinutes ?? DefaultSportsRuntimeMinutes);
+        var condensed = CondensedGamePolicy.IsCondensed(release.Title);
+        if (profile?.CondensedOnly == true && !condensed)
+            evaluation.Rejections.Add(CondensedGamePolicy.FullGameRejection);
+        else if (condensed && profile?.CondensedOnly != true)
+            evaluation.Rejections.Add("Condensed game requires a condensed-only quality profile");
+        var configuredSizeRuntimeMinutes = condensed && profile?.CondensedOnly == true
+            ? CondensedGamePolicy.RuntimeMinutes
+            : Math.Max(1, runtimeMinutes ?? DefaultSportsRuntimeMinutes);
         var minimumSizeRuntimeMinutes = ResolveMinimumSizeRuntimeMinutes(
             sport, eventTitle, configuredSizeRuntimeMinutes);
 

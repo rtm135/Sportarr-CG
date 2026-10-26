@@ -190,6 +190,7 @@ app.MapPut("/api/qualityprofile/{id}", async (int id, QualityProfile profile, Sp
             existing.IsDefault = profile.IsDefault;
         }
         existing.UpgradesAllowed = profile.UpgradesAllowed;
+        existing.CondensedOnly = profile.CondensedOnly;
         existing.CutoffQuality = profile.CutoffQuality;
         existing.Items = profile.Items;
         existing.FormatItems = profile.FormatItems;

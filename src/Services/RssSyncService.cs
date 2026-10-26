@@ -702,7 +702,7 @@ public class RssSyncService : BackgroundService
             roundRaceNumbersByRound.TryGetValue((evt.LeagueId, evt.Season, evt.Round), out var roundRaceNumbers);
             var matchResult = matchingService.ValidateRelease(release, evt, requestedPart, enableMultiPartEpisodes, preParsed,
                 earlyReleaseLimitDays: earlyLimit, roundRaceNumbers: roundRaceNumbers,
-                knownLeagues: knownLeagues, datePeers: datePeers);
+                knownLeagues: knownLeagues, datePeers: datePeers, allowCondensed: true);
             if (!matchResult.IsMatch || matchResult.IsHardRejection)
                 continue;
 

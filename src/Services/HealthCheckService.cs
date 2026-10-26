@@ -236,6 +236,7 @@ public class HealthCheckService
         var results = new List<HealthCheckResult>();
         var settings = await _db.MediaManagementSettings.FirstOrDefaultAsync();
         if (settings is null || !settings.CreateLeagueFolders) return results;
+        var roots = await _db.RootFolders.AsNoTracking().Select(r => r.Path).ToListAsync();
 
         // Every league with files, monitored or not: the files sit in the old
         // folder either way.
@@ -256,7 +257,7 @@ public class HealthCheckService
                 .ToListAsync();
 
             var stale = folders
-                .Select(LeagueFolderOf)
+                .Select(path => LeagueFolderOf(path, roots))
                 .Where(name => name != null && !string.Equals(name, expected, StringComparison.OrdinalIgnoreCase))
                 .GroupBy(name => name!, StringComparer.OrdinalIgnoreCase)
                 .OrderByDescending(g => g.Count())
@@ -283,20 +284,23 @@ public class HealthCheckService
     }
 
     /// <summary>
-    /// The league folder a file sits in: the folder above its season folder
-    /// when there is one, otherwise the folder holding the file.
+    /// The first folder inside the configured library root is the league folder.
+    /// Event folders, custom season names and optional event-type folders may add
+    /// any number of levels beneath it; the file's immediate parent is not a league.
+    /// Files outside known roots cannot establish a renamed-league warning.
     /// </summary>
-    private static string? LeagueFolderOf(string filePath)
+    internal static string? LeagueFolderOf(string filePath, IEnumerable<string> roots)
     {
-        var dir = Path.GetDirectoryName(filePath);
-        if (string.IsNullOrEmpty(dir)) return null;
-        var name = Path.GetFileName(dir);
-        if (name.StartsWith("Season ", StringComparison.OrdinalIgnoreCase))
+        var path = filePath.Replace('\\', '/');
+        foreach (var root in roots.OrderByDescending(r => r.Length))
         {
-            var parent = Path.GetDirectoryName(dir);
-            name = string.IsNullOrEmpty(parent) ? name : Path.GetFileName(parent);
+            var prefix = root.Replace('\\', '/').TrimEnd('/') + "/";
+            if (!path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) continue;
+            var relative = path[prefix.Length..];
+            var slash = relative.IndexOf('/');
+            return slash > 0 ? relative[..slash] : null;
         }
-        return string.IsNullOrWhiteSpace(name) ? null : name;
+        return null;
     }
 
     private async Task<List<HealthCheckResult>> CheckRootFoldersAsync()

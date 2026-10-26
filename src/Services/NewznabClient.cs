@@ -164,7 +164,7 @@ public class NewznabClient
         var parameters = new Dictionary<string, string> { ["q"] = query, ["extended"] = "1" };
         if (!string.IsNullOrEmpty(sportarrId) && caps?.SupportedSearchParams.Contains("sportarrid") == true)
             parameters["sportarrid"] = sportarrId;
-        var categories = useCategoryFilter ? GetEffectiveCategories(config) : new List<string>();
+        var categories = useCategoryFilter ? GetEffectiveCategories(config, caps) : new List<string>();
         if (categories.Any()) parameters["cat"] = string.Join(",", categories);
         var ambiguousPaging = IndexerSearchPaging.HasAmbiguousPaging(config);
         var retrievalUrl = BuildUrl(config, "search", parameters);
@@ -234,9 +234,11 @@ public class NewznabClient
             { "extended", "1" }
         };
 
-        // Add category filter - CRITICAL for RSS to prevent software/audio/adult content
-        // For RSS, always use categories (defaults if not configured) unlike searches
-        var categories = GetRssCategories(config);
+        // Preserve normal RSS category filtering. A source already discovered to be
+        // categoryless must omit the filter; event and profile validation still apply.
+        var capsKey = IndexerSearchPaging.CapabilityKey(config, BuildUrl(config, "caps"));
+        CapsCache.TryGetValue(capsKey, out var cachedCaps);
+        var categories = GetEffectiveCategories(config, cachedCaps.Caps);
         if (categories.Any())
         {
             parameters["cat"] = string.Join(",", categories);
@@ -295,7 +297,7 @@ public class NewznabClient
     /// Get effective categories for an indexer.
     /// Returns configured categories if set, otherwise defaults to sport-relevant TV categories.
     /// </summary>
-    private static List<string> GetEffectiveCategories(Indexer config)
+    internal static List<string> GetEffectiveCategories(Indexer config, TorznabCapabilities? caps = null)
     {
         // Use configured categories if any are set
         if (config.Categories != null && config.Categories.Any())
@@ -303,25 +305,10 @@ public class NewznabClient
             return config.Categories;
         }
 
-        // Default to standard sport categories (TV, TV/HD, TV/UHD, TV/Sport)
-        // This prevents searching movies, anime, software, etc.
-        return NewznabCategories.DefaultSportCategories.ToList();
-    }
-
-    /// <summary>
-    /// Get categories for RSS feeds.
-    /// Always returns categories (configured or defaults) to prevent irrelevant content.
-    /// </summary>
-    private static List<string> GetRssCategories(Indexer config)
-    {
-        // Use configured categories if any are set
-        if (config.Categories != null && config.Categories.Any())
-        {
-            return config.Categories;
-        }
-
-        // Default to standard sport categories for RSS (TV, TV/HD, TV/UHD, TV/Sport)
-        // RSS without category filtering would return ALL content from the indexer
+        // A known categoryless source cannot satisfy an invented TV filter.
+        // Keep explicit user categories and conservative defaults when caps are unknown.
+        if (caps != null && caps.Categories.Count == 0)
+            return new List<string>();
         return NewznabCategories.DefaultSportCategories.ToList();
     }
 

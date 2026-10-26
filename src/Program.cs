@@ -1112,7 +1112,7 @@ app.MapGet("/api/system/status", async (Sportarr.Api.Services.ConfigService conf
     var status = new SystemStatus
     {
         AppName = "Sportarr",
-        Version = Sportarr.Api.Version.GetFullVersion(),  // Use full 4-part version (e.g., 4.0.81.140)
+        Version = Sportarr.Api.Version.GetDisplayVersion(),  // Include the local patch in the native System Status display
         Branch = Environment.GetEnvironmentVariable("SPORTARR_BRANCH") ?? config.Branch,
         IsDebug = app.Environment.IsDevelopment(),
         IsProduction = app.Environment.IsProduction(),

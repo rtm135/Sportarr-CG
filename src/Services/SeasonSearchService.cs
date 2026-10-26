@@ -160,7 +160,7 @@ public class SeasonSearchService
                     earlyReleaseLimitDays: earlyLimit,
                     roundRaceNumbers: roundRaceNumbers,
                     knownLeagues: knownLeagues,
-                    datePeers: seasonEvents);
+                    datePeers: seasonEvents, allowCondensed: true);
 
                 if (matchResult.IsMatch)
                 {

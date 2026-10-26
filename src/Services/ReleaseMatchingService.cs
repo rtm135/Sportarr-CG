@@ -118,7 +118,6 @@ public class ReleaseMatchingService
         // Shortened cuts of the actual event. These ARE the event's content, but a
         // 40-minute condensed edit must never satisfy - or worse, quality-upgrade
         // and delete - a full-game want just because its resolution is higher.
-        new Regex(@"\bcondensed", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),                      // condensed, condensed game
         new Regex(@"\ball[\s\.\-_]*22\b", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant),              // All-22, All.22 coaches film
         new Regex(@"\bcoach(?:'?s|es)?[\s\.\-_]*(?:film|tape|cam)", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), // coaches film/tape/cam
     };
@@ -332,7 +331,8 @@ public class ReleaseMatchingService
         int? earlyReleaseLimitDays = null,
         IReadOnlyList<int>? roundRaceNumbers = null,
         IReadOnlyCollection<League>? knownLeagues = null,
-        IReadOnlyCollection<Event>? datePeers = null)
+        IReadOnlyCollection<Event>? datePeers = null,
+        bool allowCondensed = false)
     {
         var result = new ReleaseMatchResult
         {
@@ -393,7 +393,9 @@ public class ReleaseMatchingService
                     release.Title, evt.League?.Name, releaseTitle: true) == "Warm Up" &&
                 !_warmUpShowQualifierPattern.IsMatch(release.Title);
 
-            if (highlightsAllowed || selectedWrestlingPackage || scheduledWarmUp)
+            var condensedAllowed = allowCondensed &&
+                nonEventContent == "Condensed cut (not the full event)";
+            if (condensedAllowed || highlightsAllowed || selectedWrestlingPackage || scheduledWarmUp)
             {
                 _logger.LogTrace("[Release Matching] Allowing selected package for '{Event}': '{Release}'",
                     evt.Title, release.Title);
@@ -1826,7 +1828,7 @@ public class ReleaseMatchingService
             var limit = ResolveEarlyReleaseLimit(release, earlyReleaseLimitsByIndexer);
             var matchResult = ValidateRelease(release, evt, requestedPart, enableMultiPartEpisodes,
                 earlyReleaseLimitDays: limit, roundRaceNumbers: roundRaceNumbers,
-                knownLeagues: knownLeagues);
+                knownLeagues: knownLeagues, allowCondensed: true);
 
             if (matchResult.IsMatch)
             {
@@ -2818,6 +2820,9 @@ public class ReleaseMatchingService
                 return detected; // Fallback to matched text
             }
         }
+
+        if (CondensedGamePolicy.IsCondensed(releaseTitle))
+            return "Condensed cut (not the full event)";
 
         return null; // No non-event content detected
     }

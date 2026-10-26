@@ -3360,6 +3360,9 @@ namespace Sportarr.Api.Migrations.Postgres.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("CondensedOnly")
+                        .HasColumnType("boolean");
+
                     b.Property<int?>("CutoffFormatScore")
                         .HasColumnType("integer");
 

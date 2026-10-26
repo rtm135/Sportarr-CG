@@ -358,7 +358,7 @@ app.MapPost("/api/event/{eventId:int}/search", async (
         var earlyLimit = ReleaseMatchingService.ResolveEarlyReleaseLimit(result, earlyReleaseLimits);
         var matchResult = releaseMatchingService.ValidateRelease(result, evt, part, config.EnableMultiPartEpisodes,
             earlyReleaseLimitDays: earlyLimit, roundRaceNumbers: roundRaceNumbers,
-            knownLeagues: knownLeagues, datePeers: datePeers);
+            knownLeagues: knownLeagues, datePeers: datePeers, allowCondensed: true);
 
         if (matchResult.IsHardRejection)
         {
@@ -427,7 +427,7 @@ app.MapPost("/api/event/{eventId:int}/search", async (
                 var earlyLimit = ReleaseMatchingService.ResolveEarlyReleaseLimit(release, earlyReleaseLimits);
                 var matchResult = releaseMatchingService.ValidateRelease(release, evt, part,
                     config.EnableMultiPartEpisodes, earlyReleaseLimitDays: earlyLimit,
-                    roundRaceNumbers: roundRaceNumbers, knownLeagues: knownLeagues, datePeers: datePeers);
+                    roundRaceNumbers: roundRaceNumbers, knownLeagues: knownLeagues, datePeers: datePeers, allowCondensed: true);
                 if (matchResult.IsHardRejection)
                 {
                     release.Rejections.AddRange(matchResult.Rejections);
@@ -643,7 +643,7 @@ app.MapPost("/api/event/{eventId:int}/search-pack", async (
         var matchResult = releaseMatchingService.ValidateRelease(
             result, evt, null, packConfig.EnableMultiPartEpisodes,
             roundRaceNumbers: roundRaceNumbers, knownLeagues: knownLeagues,
-            datePeers: datePeers);
+            datePeers: datePeers, allowCondensed: true);
         if (matchResult.Rejections.Any())
         {
             result.Rejections.AddRange(matchResult.Rejections);

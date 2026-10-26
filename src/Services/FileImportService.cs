@@ -376,6 +376,19 @@ public class FileImportService : IFileImportService
             // the change tracker. No-op for the manual-import endpoints (same instance).
             download.Event = eventInfo;
 
+            // Apply cut policy before any transfer, including jobs queued before a profile change.
+            var importProfiles = await _db.QualityProfiles.AsNoTracking().ToListAsync();
+            var importProfile = RssSyncService.ResolveQualityProfile(eventInfo, importProfiles);
+            if (!allowPreferenceOverride && importProfile?.CondensedOnly == true &&
+                !CondensedGamePolicy.IsCondensed(download.Title))
+            {
+                download.Status = DownloadStatus.ImportWarning;
+                download.ErrorMessage = CondensedGamePolicy.FullGameRejection;
+                download.LastUpdate = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
+                return null!;
+            }
+
             // Get media management settings
             var settings = await GetMediaManagementSettingsAsync();
 

@@ -18,6 +18,10 @@ public static class Version
     // Starting at 4.0.5 (migrated from 4.0.4.9 4-part versioning)
     public const string AppVersion = "4.1.11";
 
+    /// <summary>Visible local-patch marker; numeric compatibility and update versions remain upstream.</summary>
+    public const string LocalPatch = "CG-only.1; Folder-health.1";
+    public static string GetDisplayVersion() => $"{GetFullVersion()} ({LocalPatch})";
+
     // API version - stays at 1.0.0 for API stability
     public const string ApiVersion = "1.0.0";
 

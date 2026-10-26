@@ -35,6 +35,9 @@ public class QualityProfile
     /// </summary>
     public bool UpgradesAllowed { get; set; } = true;
 
+    /// <summary>Require explicitly labeled condensed games; full games cannot satisfy this profile.</summary>
+    public bool CondensedOnly { get; set; } = false;
+
     /// <summary>
     /// Upgrade until this quality is reached, then stop
     /// </summary>

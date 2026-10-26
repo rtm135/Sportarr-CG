@@ -31,6 +31,14 @@ public static class ImportUpgradeRule
         QualityProfile? profile = null,
         SourcePrecedence.Verdict source = SourcePrecedence.Verdict.None)
     {
+        if (profile?.CondensedOnly == true)
+        {
+            if (!CondensedGamePolicy.IsCondensed(newTitle))
+                return new Decision(false, CondensedGamePolicy.FullGameRejection);
+            if (CondensedGamePolicy.ReplacesFullGame(profile, existingTitle, newTitle))
+                return Accept;
+        }
+
         // Source precedence outranks every quality rule (SourcePrecedence).
         if (source == SourcePrecedence.Verdict.IncomingWins)
         {

@@ -724,7 +724,7 @@ public class AutomaticSearchService : IAutomaticSearchService
                         var earlyLimit = ReleaseMatchingService.ResolveEarlyReleaseLimit(release, earlyReleaseLimits);
                         return _releaseMatchingService.ValidateRelease(release, evt, part, config.EnableMultiPartEpisodes,
                             earlyReleaseLimitDays: earlyLimit, roundRaceNumbers: roundRaceNumbers,
-                            knownLeagues: knownLeagues, datePeers: datePeers);
+                            knownLeagues: knownLeagues, datePeers: datePeers, allowCondensed: true);
                     };
                 }
 
@@ -1243,6 +1243,8 @@ public class AutomaticSearchService : IAutomaticSearchService
                                 return true;
 
                             var heldFile = HeldFileForPart(heldFilesAtCutoff, releasePart, evt);
+                            if (Helpers.CondensedGamePolicy.ReplacesFullGame(qualityProfile, heldFile?.OriginalTitle ?? heldFile?.ReleaseTitle, release.Title))
+                                return true;
                             if (Helpers.SourcePrecedence.IndexerReleaseReplaces(config, heldFile))
                                 return true;
 
@@ -1431,7 +1433,12 @@ public class AutomaticSearchService : IAutomaticSearchService
                 // 5. Compare profile rank and format score
                 // Source precedence skips all of it: an indexer release
                 // replaces an IPTV recording whatever the profile says.
-                if (Helpers.SourcePrecedence.IndexerReleaseReplaces(config, relevantFile))
+                if (qualityProfile.UpgradesAllowed && relevantFile != null &&
+                    Helpers.CondensedGamePolicy.ReplacesFullGame(qualityProfile, relevantFile.OriginalTitle ?? relevantFile.ReleaseTitle, bestRelease.Title))
+                {
+                    _logger.LogInformation("[Automatic Search] Replacing full game with requested condensed game: {Title}", bestRelease.Title);
+                }
+                else if (Helpers.SourcePrecedence.IndexerReleaseReplaces(config, relevantFile))
                 {
                     _logger.LogInformation("[Automatic Search] Replacing IPTV recording ({Quality}) with indexer release {Title}",
                         relevantFile.Quality ?? "null", bestRelease.Title);

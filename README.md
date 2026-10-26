@@ -1,3 +1,17 @@
+# Sportarr-CG
+
+An unofficial Sportarr fork for condensed games, based on upstream **v4.1.11.1121**.
+
+This fork adds a **Condensed games only** quality-profile option. It accepts explicit condensed-game labels, refuses full-game fallback, and permits a condensed version to replace a full broadcast even at a lower resolution. Existing event, date, quality, and non-event-content checks remain.
+
+It also fixes category filtering for Newznab sources that advertise no categories, corrects false league-folder health alerts for nested event layouts, and identifies the patches in native System Status. The default profile option is off.
+
+Tested with .NET 8, Linux ARM64, and SQLite. This repository currently provides source; it does not provide a public prebuilt Docker image. Read [the fork documentation](docs/features/condensed-games.md) for behavior, build instructions, and limits. Download availability depends on your sources; this fork does not supply games or subscriptions.
+
+The upstream project remains [Sportarr/Sportarr](https://github.com/Sportarr/Sportarr). This is an independent fork, not an official release. Upstream documentation and credits follow.
+
+---
+
 <div align="center">
 
 <p>

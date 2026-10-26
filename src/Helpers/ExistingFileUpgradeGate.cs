@@ -30,6 +30,14 @@ public static class ExistingFileUpgradeGate
         Config config,
         bool hasHigherPositivePreferredScore = false)
     {
+        if (profile?.CondensedOnly == true)
+        {
+            if (!CondensedGamePolicy.IsCondensed(releaseTitle))
+                return CondensedGamePolicy.FullGameRejection;
+            if (profile.UpgradesAllowed && CondensedGamePolicy.ReplacesFullGame(profile, existingFile.OriginalTitle ?? existingFile.ReleaseTitle, releaseTitle))
+                return null;
+        }
+
         // Every release reaching this gate came from an indexer, so under
         // source precedence it replaces an IPTV recording before any profile
         // rule is asked.
