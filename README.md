@@ -1,12 +1,20 @@
 # Sportarr-CG
 
-An unofficial Sportarr fork for condensed games, based on upstream **v4.1.11.1121**.
+An unofficial Sportarr fork for condensed games, based on upstream **v4.1.11.1121**. The `cg` branch is the patched default branch.
 
 This fork adds a **Condensed games only** quality-profile option. It accepts explicit condensed-game labels, refuses full-game fallback, and permits a condensed version to replace a full broadcast even at a lower resolution. Existing event, date, quality, and non-event-content checks remain.
 
 It also fixes category filtering for Newznab sources that advertise no categories, corrects false league-folder health alerts for nested event layouts, and identifies the patches in native System Status. The default profile option is off.
 
-Tested with .NET 8, Linux ARM64, and SQLite. This repository currently provides source; it does not provide a public prebuilt Docker image. Read [the fork documentation](docs/features/condensed-games.md) for behavior, build instructions, and limits. Download availability depends on your sources; this fork does not supply games or subscriptions.
+### Try it and help test
+
+This repository currently provides source code only; it does not publish a prebuilt Docker image or packaged release. To try it, build the `cg` branch by following the [upstream build guide](https://wiki.sportarr.net/development/building/) and the fork-specific [condensed games documentation](docs/features/condensed-games.md). Back up your Sportarr configuration before testing and use a test library if possible. Do not point an experimental build at a production database without a backup.
+
+The patch has been tested with .NET 8, Linux ARM64, and SQLite. The upstream v4.1.11.1121 integration suite passed 6,288 tests; six existing `VolumeComparisonTests` were excluded because two fail on the unmodified upstream build in the same SDK container. The final patch-version check passed 43 affected tests. PostgreSQL migration metadata is included but a PostgreSQL deployment has not been tested.
+
+Tester feedback is welcome through [GitHub Issues](https://github.com/rtm135/Sportarr-CG/issues). Please include the Sportarr version, operating system/container architecture, database type, whether the release was found by automatic or manual search, and sanitized logs. Never post API keys, credentials, private tracker details, or copyrighted media.
+
+Condensed-game availability depends on your indexers and subscriptions; this fork does not provide games or access to sources. The default **Condensed games only** profile option is off, so enable it on a test profile to exercise the feature.
 
 The upstream project remains [Sportarr/Sportarr](https://github.com/Sportarr/Sportarr). This is an independent fork, not an official release. Upstream documentation and credits follow.
 
